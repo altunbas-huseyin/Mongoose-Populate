@@ -8,24 +8,24 @@ console.log('Running mongoose version %s', mongoose.version);
  * Console schema
  */
 
-var consoleSchema = Schema({
-    name: String
-  , manufacturer: String
-  , released: Date
+var KategorilerSchema = Schema({
+    ad: String
+  , kullan: Number
+  , olusturma: Date
 })
-var Console = mongoose.model('Console', consoleSchema);
+var Kategoriler = mongoose.model('Kategoriler', KategorilerSchema);
 
 /**
  * Game schema
  */
 
-var gameSchema = Schema({
-    name: String
-  , developer: String
-  , released: Date
-  , consoles: [{ type: Schema.Types.ObjectId, ref: 'Console' }]
+var urunlerSchema = Schema({
+    ad: String
+  , marka: String
+  , olusturma: Date
+  , kat_id: [{ type: Schema.Types.ObjectId, ref: 'Kategoriler' }]
 })
-var Game = mongoose.model('Game', gameSchema);
+var Urunler = mongoose.model('Urunler', urunlerSchema);
 
 /**
  * Connect to the console database on localhost with
@@ -45,18 +45,18 @@ mongoose.connect('mongodb://localhost/console', function (err) {
  */
 
 function createData () {
-  Console.create({
-      name: 'Nintendo 64'
-    , manufacturer: 'Nintendo'
-    , released: 'September 29, 1996'
+    Kategoriler.create({
+      ad: 'Telefonlar'
+    , kullan: 1
+    , olusturma: 'September 29, 1996'
   }, function (err, nintendo64) {
     if (err) return done(err);
 
-    Game.create({
-        name: 'Legend of Zelda: Ocarina of Time'
-      , developer: 'Nintendo'
-      , released: new Date('November 21, 1998')
-      , consoles: [nintendo64]
+        Urunler.create({
+        ad: 'Nokia 3310'
+      , marka: 'Nokia'
+      , olusturma: new Date('November 21, 1998')
+      , kat_id: [nintendo64]
     }, function (err) {
       if (err) return done(err);
       example();
@@ -69,17 +69,17 @@ function createData () {
  */
 
 function example () {
-  Game
-  .findOne({ name: /^Legend of Zelda/ })
-  .populate('consoles')
+    Urunler
+  .findOne()
+  .populate('kat_id')
   .exec(function (err, ocinara) {
     if (err) return done(err);
 
-    console.log(
-        '"%s" was released for the %s on %s'
-      , ocinara.name
-      , ocinara.consoles[0].name
-      , ocinara.released.toLocaleDateString());
+    /*console.log(
+     '"%s" was released for the %s on %s'
+     , ocinara.name
+     , ocinara.consoles[0].name
+     , ocinara.released.toLocaleDateString());*/
 
     console.log(JSON.stringify(ocinara));
 
@@ -89,8 +89,8 @@ function example () {
 
 function done (err) {
   if (err) console.error(err);
-  Console.remove(function () {
-    Game.remove(function () {
+    Kategoriler.remove(function () {
+        Urunler.remove(function () {
       mongoose.disconnect();
     })
   })
